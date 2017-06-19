@@ -1,6 +1,6 @@
 #ifndef FIGURE_H
 #define FIGURE_H
-
+#include <iostream>
 enum PieceName{
     queen = 0,
     king = 1,
@@ -22,6 +22,8 @@ class Figure
 {
 public:
     Figure(PieceName name, Team team);
+    void setName(PieceName name);
+    bool isFigureInThisField();
 private:
     PieceName name;
     Team team;

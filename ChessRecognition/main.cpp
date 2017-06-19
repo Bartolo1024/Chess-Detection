@@ -4,6 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "fieldfinder.h"
 #include "board.h"
+#include "figure.h"
 
 using namespace std;
 using namespace cv;
@@ -16,13 +17,11 @@ int main(int argc, char** argv)
 {
     int scale = 4;
     int allowedError;
-    //To find largest rectangle
-    //Rect boundingRectangle;
 
     Mat scaleInputMatrix, cannyMat, grayMatrix, harrisdst, dst_norm, cornersAfterHarrisDetestor;
 
     // Load picture and set size
-    string path = string("data/6.jpg");
+    string path = string("data/2.jpg");
     Mat input = imread(path);
     resize(input, scaleInputMatrix, Size(input.cols/scale, input.rows/scale)); ///
     cvtColor(scaleInputMatrix, grayMatrix, COLOR_BGR2GRAY);
@@ -85,8 +84,18 @@ int main(int argc, char** argv)
     vector<cv::Rect> boundRect(contours.size());
     for(size_t i=0; i < contours.size(); i++){
         boundRect[i] = boundingRect(contours[i]);
+        boundRect[i].width -=20;
+        boundRect[i].height -=20;
+        boundRect[i].x +=10;
+        boundRect[i].y +=10;
+        if(boundRect[i].width < boundRect[i].height){
+            boundRect[i].height = boundRect[i].width;
+        }
+        if(boundRect[i].height < boundRect[i].width){
+            boundRect[i].width = boundRect[i].height;
+        }
         matsWithRects.push_back(make_pair(Mat (grayMatrix, boundRect[i]), boundRect[i]));
-        drawContours(scaleInputMatrix, contours, i, Scalar(255, 255, 255), CV_FILLED);
+        //drawContours(scaleInputMatrix, contours, i, Scalar(255, 255, 255), CV_FILLED);
     }
 
     subimages = sortMats(matsWithRects);
@@ -96,9 +105,22 @@ int main(int argc, char** argv)
     board->processWhiteSquares();
     board->processBlackSquares();
 
+
+    std::vector< std::vector <Figure*> > checkedFigures = board->getFigures();
+    vector<vector<Rect> > rects = sortRectangles(matsWithRects);
+
+    for (int i = 0; i < subimages.size(); i++){
+        for(int j = 0; j < subimages.size(); j++){
+            Figure *actualFig = checkedFigures[i][j];
+            if(actualFig->isFigureInThisField() == true){
+                rectangle(scaleInputMatrix, rects[i][j], Scalar(255),1);
+            }
+        }
+    }
+
     // Show output*/
     grayMatrix = grayMatrix + cornersAfterHarrisDetestor;
-    //imshow("output", scaleInputMatrix);
+    imshow("output", scaleInputMatrix);
     waitKey(0);
 
     delete board;

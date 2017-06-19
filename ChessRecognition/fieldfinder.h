@@ -10,4 +10,5 @@ using namespace cv;
 
 Mat findFieldsAndDrawItOnImage(Mat cornersBeforeHarrisDetestor, double allowedError,Mat  scaleInputMatrix);
 vector< vector<Mat> > sortMats(vector<pair<Mat, Rect>> matsWithRectangles);
+vector<vector<Rect> > sortRectangles(vector<pair<Mat, Rect>> matsWithRectangles);
 #endif // FIELDFINDER_H

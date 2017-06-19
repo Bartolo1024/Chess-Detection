@@ -178,3 +178,41 @@ vector< vector<Mat> > sortMats(vector<pair<Mat, Rect>> matsWithRectangles)
     }
     return sortedMats;
 }
+
+vector< vector<Rect> > sortRectangles(vector<pair<Mat, Rect>> matsWithRectangles)
+{
+    vector< vector<Rect> > sortedRects;
+    for(int r = 0; r < 8; r++){
+        vector<pair<Mat, Rect>> row;
+        vector<Rect> rectRow;
+        for(int c = 0; c < 8; c++){
+           int maxIndex = 0, actualIndex = 0;
+           pair<Mat, Rect> maxYMat = matsWithRectangles[0];
+           for(pair<Mat, Rect> mat : matsWithRectangles){
+               Rect rect = mat.second, maxMatRect = maxYMat.second;
+               if(rect.y > maxMatRect.y){
+                   maxYMat = mat;
+                   maxIndex = actualIndex;
+               }
+               actualIndex++;
+           }
+           row.push_back(maxYMat);
+           matsWithRectangles.erase(matsWithRectangles.begin()+maxIndex);
+        }
+        for(int i = 0; i < row.size(); i++){
+            for(int j = 1; j < row.size(); j++){
+                pair<Mat, Rect> actualR = row[j], prevR = row[j - 1], tmp;
+                if(actualR.second.x < prevR.second.x){
+                    tmp = row[j];
+                    row[j] = row[j - 1];
+                    row[j - 1] = tmp;
+                }
+            }
+        }
+        for(pair<Mat, Rect> matRect : row){
+            rectRow.push_back(matRect.second);
+        }
+        sortedRects.push_back(rectRow);
+    }
+    return sortedRects;
+}

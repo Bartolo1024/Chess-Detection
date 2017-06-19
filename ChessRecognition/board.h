@@ -16,10 +16,11 @@ public:
     void processWhiteSquares();
     void processBlackSquares();
     void showMats();
+    std::vector< std::vector <Figure*> > getFigures();
 private:
     //functions
-    void checkWhiteSquare(cv::Mat square);
-    void checkBlackSquare(cv::Mat square);
+    bool checkWhiteSquare(cv::Mat square, std::string name);
+    bool checkBlackSquare(cv::Mat square);
 
     //data
     std::vector< std::vector <Figure*> > figures;
