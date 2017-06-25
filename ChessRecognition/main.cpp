@@ -21,7 +21,7 @@ int main(int argc, char** argv)
     Mat scaleInputMatrix, cannyMat, grayMatrix, harrisdst, dst_norm, cornersAfterHarrisDetestor;
 
     // Load picture and set size
-    string path = string("data/2.jpg");
+    string path = string("data/1.jpg");
     Mat input = imread(path);
     resize(input, scaleInputMatrix, Size(input.cols/scale, input.rows/scale)); ///
     cvtColor(scaleInputMatrix, grayMatrix, COLOR_BGR2GRAY);

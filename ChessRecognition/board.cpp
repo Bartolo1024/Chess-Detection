@@ -12,7 +12,9 @@ Board::Board(std::vector<std::vector<cv::Mat> > vectorOfSubimages)
         }
         figures.push_back(row);
     }
-    //showMats();
+    blackSquareAverange = averangeIntensityOfBlackSquares();
+    whiteSquareAverange = averangeIntensityOfWhiteSquares();
+    std::cout<<blackSquareAverange<<"\t"<<whiteSquareAverange<<std::endl;
 }
 
 Board::~Board()
@@ -40,23 +42,19 @@ void Board::processWhiteSquares()
                         Figure *fig = figures[i][j];
                         fig->setName(unidentified);
                     }
-                    //ss << checkWhiteSquare(row[j], str);
-                    str = ss.str();
-                    //cv::imshow(str, row[j]);
                 }
             }
             else{
                 if(j%2==0){
-                    //process function
                     std::ostringstream ss;
                     ss << i;
                     ss << j;
                     std::string str = ss.str();
+                    //process function
                     if(checkWhiteSquare(row[j], str)){
                         Figure *fig = figures[i][j];
                         fig->setName(unidentified);
                     }
-                    //cv::imshow(str, row[j]);
                 }
             }
         }
@@ -70,37 +68,28 @@ void Board::processBlackSquares()
         for(int j = 0; j < row.size(); j++){
             if(i%2==0){
                 if(j%2==0){
-                    //process function
-                    std::ostringstream ss;
+                    /*std::ostringstream ss;
                     ss << i;
                     ss << j;
-                    std::string str = ss.str();
-                    //if(i==0 && j == 4)cv::imshow(str, row[j]);
+                    std::string str = ss.str();*/
+                    //process function
                     if(checkBlackSquare(row[j])){
                         Figure *fig = figures[i][j];
                         fig->setName(unidentified);
                     }
-                    ss<<'c';
-                    str = ss.str();
-                    /*if(i==0 && j == 4)*///cv::imshow(str, row[j]);
                 }
             }
             else{
                 if(j%2==1){
-                    std::ostringstream ss;
+                    /*std::ostringstream ss;
                     ss << i;
                     ss << j;
-                    std::string str = ss.str();
-                    //if((i==7 || i==3) && j == 3)cv::imshow(str, row[j]);
+                    std::string str = ss.str();*/
                     //process function
-                    //std::cout<<i<<j<<" ";
                     if(checkBlackSquare(row[j])){
                         Figure *fig = figures[i][j];
                         fig->setName(unidentified);
                     }
-                    ss<<'c';
-                    str = ss.str();
-                    /*if((i==7 || i==3) && j == 3)*///cv::imshow(str, row[j]);
                 }
             }
         }
@@ -134,7 +123,7 @@ bool Board::checkWhiteSquare(cv::Mat square, std::string name)
     contrast = square + tophat - blackhat;
     square = contrast;
     cv::GaussianBlur(square, square, cv::Size(3,5), 1);
-    cv::Canny(square, square, 50, 150, 3);
+    cv::Canny(square, square, 0.6*whiteSquareAverange, 0.8*whiteSquareAverange, 3);
     std::vector< std::vector<cv::Point> > contours;
     cv::findContours(square.clone(), contours, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
     int pointsCount = 0;
@@ -144,9 +133,9 @@ bool Board::checkWhiteSquare(cv::Mat square, std::string name)
             pointsCount += contour.size();
         }
     }
-    std::cout<<name<<"\t"<<pointsCount<<std::endl;
-    cv::imshow(name, square);
-    if(pointsCount > 350)   return true;
+    //std::cout<<name<<"\t"<<pointsCount<<std::endl;
+    //cv::imshow(name, square);
+    if(pointsCount > 0.6*averangeIntensityOfWhiteSquares())   return true;
     return false;
 }
 
@@ -158,7 +147,7 @@ bool Board::checkBlackSquare(cv::Mat square)
     contrast = square + tophat - blackhat;
     square = contrast;
     cv::GaussianBlur(square, square, cv::Size(3,5), 1);
-    cv::Canny(square, square, 90, 170, 3);
+    cv::Canny(square, square, 1*blackSquareAverange, 3.5*blackSquareAverange, 3);
     std::vector< std::vector<cv::Point> > contours;
     cv::findContours(square.clone(), contours, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
     int pointsCount = 0;
@@ -168,7 +157,76 @@ bool Board::checkBlackSquare(cv::Mat square)
             pointsCount += contour.size();
         }
     }
-    //std::cout<<pointsCount<<std::endl;
-    if(pointsCount > 150)   return true;
+    if(pointsCount > blackSquareAverange*3)   return true;
     return false;
+}
+
+double Board::averangeIntensityOfBlackSquares()
+{
+    int counter = 0;
+    double avg = 0;
+    for(int i = 0; i < subimages.size(); i++){
+        std::vector<cv::Mat>  row = subimages[i];
+        for(int j = 0; j < row.size(); j++){
+            if(i%2==0){
+                if(j%2==0){
+                    cv::Mat m = row[j];
+                    for(int r = 0; r < m.rows; r++){
+                        for(int c = 0; c < m.cols; c++){
+                            avg += m.at<uchar>(r, c);
+                            counter++;
+                        }
+                    }
+                }
+            }
+            else{
+                if(j%2==1){
+                    cv::Mat m = row[j];
+                    for(int r = 0; r < m.rows; r++){
+                        for(int c = 0; c < m.cols; c++){
+                            avg += m.at<uchar>(r, c);
+                            counter++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    avg /= counter;
+    return avg;
+}
+
+double Board::averangeIntensityOfWhiteSquares()
+{
+    int counter = 0;
+    double avg = 0;
+    for(int i = 0; i < subimages.size(); i++){
+        std::vector<cv::Mat>  row = subimages[i];
+        for(int j = 0; j < row.size(); j++){
+            if(i%2==0){
+                if(j%2==1){
+                    cv::Mat m = row[j];
+                    for(int r = 0; r < m.rows; r++){
+                        for(int c = 0; c < m.cols; c++){
+                            avg += m.at<uchar>(r, c);
+                            counter++;
+                        }
+                    }
+                }
+            }
+            else{
+                if(j%2==0){
+                    cv::Mat m = row[j];
+                    for(int r = 0; r < m.rows; r++){
+                        for(int c = 0; c < m.cols; c++){
+                            avg += m.at<uchar>(r, c);
+                            counter++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    avg /= counter;
+    return avg;
 }

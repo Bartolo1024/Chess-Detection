@@ -22,9 +22,15 @@ private:
     bool checkWhiteSquare(cv::Mat square, std::string name);
     bool checkBlackSquare(cv::Mat square);
 
+    double averangeIntensityOfBlackSquares();
+    double averangeIntensityOfWhiteSquares();
+
     //data
     std::vector< std::vector <Figure*> > figures;
-    std::vector< std::vector <cv::Mat > > subimages;
+    std::vector< std::vector <cv::Mat> > subimages;
+
+    double whiteSquareAverange;
+    double blackSquareAverange;
 };
 
 #endif // BOARD_H
