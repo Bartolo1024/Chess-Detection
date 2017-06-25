@@ -21,7 +21,7 @@ int main(int argc, char** argv)
     Mat scaleInputMatrix, cannyMat, grayMatrix, harrisdst, dst_norm, cornersAfterHarrisDetestor;
 
     // Load picture and set size
-    string path = string("data/1.jpg");
+    string path = string("data/2.jpg");
     Mat input = imread(path);
     resize(input, scaleInputMatrix, Size(input.cols/scale, input.rows/scale)); ///
     cvtColor(scaleInputMatrix, grayMatrix, COLOR_BGR2GRAY);
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 
     //MASK OF FIELDS
     Mat mask = Mat(scaleInputMatrix.rows ,scaleInputMatrix.cols, CV_8UC1);
-    mask = 0;
+    mask.setTo(Scalar(0));
     mask = findFieldsAndDrawItOnImage(cornersAfterHarrisDetestor, allowedError, mask);
     //threshold(grayMatrix, grayMatrix, 200, 255, THRESH_BINARY);
     vector< vector< Point > > contours;
